@@ -6,7 +6,7 @@ class exmodule {
 		mode => '1777',
 		owner => 'root',
 		group => 'root',
-		content => "Hello World. Sistema operativo $osfamily $operatingsystemrelease",
+		content => "Hello World. Sistema operativo $kernel $operatingsystemrelease",
 		require => File['/var/www/myproject']
 	}
 
@@ -66,13 +66,11 @@ class exmodule {
   	}
 
    	mysql::db { 'mympwar':
-      user     => 'vagrant',
-      password => 'vagrant',
+      user     => 'vagrant'
   	}
 
   	mysql::db { 'mpwar_test':
-      user     => 'vagrant',
-      password => 'vagrant',
+      user     => 'vagrant'
   	}
 
   	#FIREWALL
