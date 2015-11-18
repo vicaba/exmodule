@@ -1,105 +1,136 @@
 class exmodule {
 
-	file {'/var/www/myproject/index.php':
-		ensure => 'file',
-		path => '/var/www/myproject/index.php',
-		mode => '1777',
-		owner => 'root',
-		group => 'root',
-		content => "Hello World. Sistema operativo $kernel $operatingsystemrelease",
-		require => File['/var/www/myproject']
+	class{'exmodule::apache':}
+
+	class {'exmodule::mysql':}
+
+	class{'exmodule::mongo':}
+
+
+
+
+	class exmodule::apache {
+
+		include exmodule::time
+
+		file {'/var/www/myproject/index.php':
+			ensure => 'file',
+			path => '/var/www/myproject/index.php',
+			mode => '1777',
+			owner => 'root',
+			group => 'root',
+			content => "Hello World. Sistema operativo $kernel $operatingsystemrelease",
+			require => File['/var/www/myproject']
+		}
+
+		file {'/var/www/myproject/info.php':
+			ensure => 'file',
+			path => '/var/www/myproject/info.php',
+			mode => '1777',
+			owner => 'root',
+			group => 'root',
+			content => "<?php phpinfo();",
+			require => File['/var/www/myproject']
+		}
+
+		file {'/var/www/myproject':
+			ensure => 'directory',
+			path => '/var/www/myproject',
+			mode => '1777',
+			owner => 'root',
+			group => 'root',
+			before => Class['apache']
+		}
+
+		# APACHE
+		class{ 'apache': }
+
+		apache::vhost { 'myMpwar.prod':
+			port    => '80',
+			docroot       => '/var/www/myproject',
+		}
+
+		apache::vhost { 'myMpwar.dev':
+			port    => '80',
+			docroot       => '/var/www/myproject',
+		}
+
+		include apache::mod::php
+
+		
+		# PHP
+		include ::yum::repo::remi
+		package { 'libzip-last':
+			require => Yumrepo['remi']
+		}
+
+		class{ '::yum::repo::remi_php56':
+			require => Package['libzip-last']
+		}
+
+		class { 'php':
+			version => 'latest',
+			require => Yumrepo['remi-php56'],
+		}
+
 	}
 
-	file {'/var/www/myproject/info.php':
-		ensure => 'file',
-		path => '/var/www/myproject/info.php',
-		mode => '1777',
-		owner => 'root',
-		group => 'root',
-		content => "<?php phpinfo();",
-		require => File['/var/www/myproject']
-	}
+	class exmodule::mysql {
 
-	file {'/var/www/myproject':
-		ensure => 'directory',
-		path => '/var/www/myproject',
-		mode => '1777',
-		owner => 'root',
-		group => 'root',
-		before => Class['apache']
-	}
+		# MYSQL
+	  	class { '::mysql::server':
+		  	mysql::db { 'mympwar':
+		      user     => 'vagrant',
+		      password => 'vagrant'
+		  	}
 
-	# APACHE
-	class{ 'apache': }
+		  	mysql::db { 'mpwar_test':
+		      user     => 'vagrant',
+		      password => 'vagrant'
+		  	}
 
-	apache::vhost { 'myMpwar.prod':
-		port    => '80',
-		docroot       => '/var/www/myproject',
-	}
+		  	#FIREWALL
+		  	firewalld_rich_rule { 'Accept HTTP':
+		      ensure  => present,
+		      zone    => 'public',
+		      service => 'http',
+		      action  => 'accept',
+		    }
+	  	}
 
-	apache::vhost { 'myMpwar.dev':
-		port    => '80',
-		docroot       => '/var/www/myproject',
-	}
+	  	include exmodule::time
 
-	include apache::mod::php
-
-	
-	# PHP
-	include ::yum::repo::remi
-	package { 'libzip-last':
-		require => Yumrepo['remi']
-	}
-
-	class{ '::yum::repo::remi_php56':
-		require => Package['libzip-last']
-	}
-
-	class { 'php':
-		version => 'latest',
-		require => Yumrepo['remi-php56'],
 	}
 
 
-	# MYSQL
-  	class { '::mysql::server':
+  	class exmodule::time {
+	    # Ensure Time Zone and Region.
+		class { 'timezone':
+			timezone => 'Europe/Madrid',
+		}
+
+		#NTP
+		class { '::ntp':
+			server => [ '1.es.pool.ntp.org', '2.europe.pool.ntp.org', '3.europe.pool.ntp.org' ],
+	}
   	}
 
-   	mysql::db { 'mympwar':
-      user     => 'vagrant',
-      password => 'vagrant'
-  	}
 
-  	mysql::db { 'mpwar_test':
-      user     => 'vagrant',
-      password => 'vagrant'
-  	}
+	class exmodule::mongo {
+	  	include exmodule::time
 
-  	#FIREWALL
-  	firewalld_rich_rule { 'Accept HTTP':
-      ensure  => present,
-      zone    => 'public',
-      service => 'http',
-      action  => 'accept',
-    }
 
-    # Ensure Time Zone and Region.
-	class { 'timezone':
-		timezone => 'Europe/Madrid',
-	}
 
-	#NTP
-	class { '::ntp':
-		server => [ '1.es.pool.ntp.org', '2.europe.pool.ntp.org', '3.europe.pool.ntp.org' ],
-	}
-
-	# MONGO DB
+	# MONGO DB (no va)
 	# class {'::mongodb::server':
   	# 	port    => 27018,
   	# 	verbose => true,
 	# }
 
 	# class {'::mongodb::client':}
+
+	}
+
 
 
 }
