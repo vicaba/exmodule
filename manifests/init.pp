@@ -78,7 +78,7 @@ class exmodule {
 	class exmodule::mysql {
 
 		# MYSQL
-	  	class { '::mysql::server':
+	  	class { '::mysql::server':}
 		  	mysql::db { 'mympwar':}
 		      user     => 'vagrant',
 		      password => 'vagrant'
