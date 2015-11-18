@@ -7,11 +7,16 @@ class exmodule {
 	class{'exmodule::mongo':}
 
 
-
-
 	class exmodule::apache {
 
 		include exmodule::time
+
+		firewalld_rich_rule { 'Accept HTTP':
+	      ensure  => present,
+	      zone    => 'public',
+	      service => 'http',
+	      action  => 'accept',
+	    }
 
 		file {'/var/www/myproject/index.php':
 			ensure => 'file',
@@ -97,12 +102,11 @@ class exmodule {
 		      service => 'http',
 		      action  => 'accept',
 		    }
-	  	}
+
 
 	  	include exmodule::time
 
-	}
-
+	  	}
 
   	class exmodule::time {
 	    # Ensure Time Zone and Region.
@@ -129,7 +133,6 @@ class exmodule {
 	# }
 
 	# class {'::mongodb::client':}
-
-
+}
 
 }
