@@ -66,11 +66,13 @@ class exmodule {
   	}
 
    	mysql::db { 'mympwar':
-      user     => 'vagrant'
+      user     => 'vagrant',
+      password => 'vagrant'
   	}
 
   	mysql::db { 'mpwar_test':
-      user     => 'vagrant'
+      user     => 'vagrant',
+      password => 'vagrant'
   	}
 
   	#FIREWALL
