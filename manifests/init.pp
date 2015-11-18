@@ -130,8 +130,6 @@ class exmodule {
 
 	# class {'::mongodb::client':}
 
-	}
-
 
 
 }
