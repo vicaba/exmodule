@@ -79,7 +79,7 @@ class exmodule {
 
 		# MYSQL
 	  	class { '::mysql::server':
-		  	mysql::db { 'mympwar':
+		  	mysql::db { 'mympwar':}
 		      user     => 'vagrant',
 		      password => 'vagrant'
 		  	}
